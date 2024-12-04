@@ -1235,19 +1235,19 @@ frs: qnr lhk lsr`;
 
 (async function main () {
   for (let [name, rawData] of [['example1', example1], ['input', input]]) {
-    const components = new Map(
+    const components = Object.fromEntries(
       rawData
         .split('\n')
         .map(line => line.split(': '))
         .map(pair => [pair[0], new Set(pair[1].split(' '))])
     )
 
-    for(let [key, val] of components.entries()) {
-      for (let component of val.values()) {
-        if (components.has(component)) {
-          components.get(component).add(key)
+    for(let key in components) {
+      for (let component of components[key].values()) {
+        if (components[component]) {
+          components[component].add(key)
         } else {
-          components.set(component, new Set([key]))
+          components[component] = new Set([key])
         }
       }
     }
@@ -1263,60 +1263,53 @@ frs: qnr lhk lsr`;
       const comps = structuredClone(components)
 
       for (let i = 0; i < 3; i++) {
-        const map = new Map([...comps.keys()].map(key => [key, 0]))
+        const map = Object.fromEntries(Object.keys(comps).map(key => [key, 0]))
 
-        for (let key of comps.keys()) {
+        for (let key in map) {
           const seen = new Set()
           const q = [[key, 0]]
+          seen.add(key)
 
           while (q.length) {
             const [comp, d] = q.shift()
 
-            if (seen.has(comp)) continue
+            map[comp] += d
 
-            seen.add(comp)
-            map.set(comp, map.get(comp) + d)
-
-            for (let component of comps.get(comp).values()) {
-              q.push([component, d + 1])
+            for (let component of comps[comp].values()) {
+              if (!seen.has(component)) {
+                seen.add(component)
+                q.push([component, d + 1])
+              }
             }
           }
         }
 
-        const sorted = [...map.entries()].sort((a, b) => a[0].localeCompare(b[0])).sort((a, b) => a[1] - b[1])
+        const sorted = Object.entries(map).sort((a, b) => a[0].localeCompare(b[0]) + a[1] - b[1])
 
         for (let i = 1; i < 6; i++) {
-          if (sorted[i][1] > sorted[0][1] && comps.get(sorted[0][0]).has(sorted[i][0])) {
-            comps.get(sorted[0][0]).delete(sorted[i][0])
-            comps.get(sorted[i][0]).delete(sorted[0][0])
+          if (sorted[i][1] > sorted[0][1] && comps[sorted[0][0]].has(sorted[i][0])) {
+            comps[sorted[0][0]].delete(sorted[i][0])
+            comps[sorted[i][0]].delete(sorted[0][0])
             break
           }
         }
       }
 
-      const map = new Map([...comps.keys()].map(key => [key, 0]))
+      const seen = new Set()
+      let ans = 0
 
-      for (let key of comps.keys()) {
-        const seen = new Set()
-        const q = [key]
+      function dfs (i) {
+          seen.add(i)
 
-        while (q.length) {
-          const comp = q.shift()
-
-          if (seen.has(comp)) continue
-
-          seen.add(comp)
-          map.set(comp, map.get(comp) + 1)
-
-          for (let component of comps.get(comp).values()) {
-            q.push(component)
+          for (let j of comps[i].values()) {
+              if (!seen.has(j)) dfs(j)
           }
-        }
       }
 
-      const groups = [...new Set(map.values())]
+      dfs(Object.keys(comps)[0])
+      ans = seen.size * (Object.keys(comps).length - seen.size)
 
-      console.log(groups[0] * groups[1]);
+      console.log(ans);
       console.timeEnd(`start ${name} ${part2 ? 'part 2' : 'part 1'}`)
     }
   }

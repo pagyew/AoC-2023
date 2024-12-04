@@ -698,7 +698,7 @@ function area (path) {
   return A / 2
 };
 
-function perimetr (path) {
+function perimeter (path) {
   let P = 0
 
   for (let i = 1; i < path.length; i++) {
@@ -741,7 +741,7 @@ function perimetr (path) {
       }
 
       let A = area(path)
-      let P = perimetr(path)
+      let P = perimeter(path)
       let inside = A - P/2 + 1
 
       console.log(`ans: ${P + inside}`);
