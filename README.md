@@ -1,4 +1,5 @@
 <div align="center">
+  <img src=".github/assets/cover.png" alt="Advent of Code — project illustration" width="100%" />
   <h1>Advent of Code 2023</h1>
   <p><strong>Puzzle experiments in JavaScript, with a little symbolic algebra.</strong></p>
   <p>
